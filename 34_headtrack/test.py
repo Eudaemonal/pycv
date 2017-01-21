@@ -3,58 +3,28 @@
 
 
 
-
+import numpy as np
 import cv2
 
-HAAR_CASCADE_PATH = "haarcascade_frontalface_alt.xml"
-CAMERA_INDEX = 0
-
-def detect_faces(image):
-	#print 'detect fn' #
-	faces = []
-	#detected = cv.HaarDetectObjects(image, cascade, storage, 1.2, 2, cv.CV_HAAR_DO_CANNY_PRUNING, (100,100))
-	detected = cascade.detectMultiScale(image,1.3,4,cv2.CV_HAAR_SCALE_IMAGE,(20,20))
-	print(detected)
-
-	if detected!=[]:
-		#print 'face detected' #
-		for (x,y,w,h) in detected: #for (x,y,w,h),n in detected:
-			faces.append((x,y,w,h))
-	return faces
-
-if __name__ == "__main__":
-	#print 'creating window' #
-	cv2.namedWindow("Video")
-
-	capture = cv2.VideoCapture(CAMERA_INDEX)
-	#storage = cv.CreateMemStorage()
-	cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
-	faces = []
-
-	i = 0
-	c = -1
-	while (c == -1):
-		retval, image = capture.read()
-		#print 'acq img frm' #
-
-		# Only run the Detection algorithm every 5 frames to improve performance
-		if i%5==0:
-			#print 'calling detect' #
-			faces = detect_faces(image)
-
-		for (x,y,w,h) in faces:
-			#print 'drawing rectangle' #
-			cv2.cv.Rectangle(cv2.cv.fromarray(image), (x,y), (x+w,y+h), 255)
-
-		#print 'showing img' #
-		cv2.imshow("Video",image)
-		#cv.ShowImage("Video", image)
-		i += 1
-		c = cv2.waitKey(10)
-		if(c==27):
-			#escape
-			break;
 
 
+cvpath='/home/eudaemon/opencv/data/haarcascades/'
+
+face_cascade = cv2.CascadeClassifier(cvpath+'haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier(cvpath+'haarcascade_eye.xml')
+img = cv2.imread('full_house.jpg')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+for (x,y,w,h) in faces:
+    cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+    roi_gray = gray[y:y+h, x:x+w]
+    roi_color = img[y:y+h, x:x+w]
+    eyes = eye_cascade.detectMultiScale(roi_gray)
+    for (ex,ey,ew,eh) in eyes:
+        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+cv2.imshow('img',img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 
